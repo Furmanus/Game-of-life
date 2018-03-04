@@ -1,0 +1,8 @@
+td{
+    width: 16px;
+    height: 16px;
+    padding: 0;
+}
+td:hover{
+    box-shadow:0 0 0 1px #813772 inset;
+}

@@ -1,0 +1,23 @@
+.select-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 16px;
+    cursor: default;
+}
+.select-container p{
+    text-align: center;
+    margin-bottom: 8px;
+}
+.select-lc{
+    width: 80%;
+    height: 24px;
+    background-color: snow;
+    opacity: 0.7;
+    border-radius: 10px;
+    outline: 0
+}
+.select:hover{
+    opacity: 1;
+}

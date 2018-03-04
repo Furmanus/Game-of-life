@@ -1,0 +1,9 @@
+.board-table{
+    border: 1px solid #062F4F;
+}
+table{
+    max-width: 95%;
+    max-height: 95%;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
