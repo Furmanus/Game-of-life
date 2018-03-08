@@ -1,6 +1,7 @@
 import {
     GAME_BOARD_SCREEN_PERCENTAGE,
-    TABLE_CELL_WIDTH
+    TABLE_CELL_WIDTH,
+    CANVAS_CELL_WIDTH
 } from '../constants/number_constants';
 
 export function calculateTableDimension(){
@@ -11,5 +12,22 @@ export function calculateTableDimension(){
     return {
         rows: Math.floor(sideLength / TABLE_CELL_WIDTH),
         columns: Math.floor(sideLength / TABLE_CELL_WIDTH)
+    };
+}
+
+export function getAppContainerDimenstion(){
+    let width = Math.floor(document.body.clientWidth * 0.7);
+    let height = Math.floor(document.body.clientHeight * 0.9);
+    let sideLength = (width > height) ? height : width;
+
+    width -= width % CANVAS_CELL_WIDTH;
+    height -= height % CANVAS_CELL_WIDTH;
+    sideLength -= sideLength % CANVAS_CELL_WIDTH;
+
+    return {
+        rows: sideLength / CANVAS_CELL_WIDTH,
+        columns: sideLength / CANVAS_CELL_WIDTH,
+        width: sideLength,
+        height: sideLength
     };
 }

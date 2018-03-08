@@ -10,6 +10,7 @@ import {
     stopCycle
 } from '../actions/action_creators';
 import {connect} from 'react-redux';
+import {spaceKeyEventListener} from '../utils/events';
 
 const mapStateToProps = state => {
     return {
@@ -35,17 +36,13 @@ class GameContainer extends React.PureComponent{
     constructor(props){
         super(props);
 
-        window.addEventListener('keydown', ev => {
-            if(ev.keyCode === 32){
-                ev.preventDefault();
+        this.spaceKeyEventListener = spaceKeyEventListener.bind(this);
 
-                if(this.props.timerId){
-                    this.props.stopCycle(this.props.timerId);
-                }else {
-                    this.props.startCycle();
-                }
-            }
-        });
+        window.addEventListener('keydown', this.spaceKeyEventListener);
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('keydown', this.spaceKeyEventListener);
     }
 
     @autobind
@@ -71,6 +68,7 @@ class GameContainer extends React.PureComponent{
     }
 
     render(){
+
         return (
             <table className='board-table'>
                 <tbody>

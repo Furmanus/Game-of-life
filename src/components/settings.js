@@ -46,6 +46,13 @@ export class Settings extends React.PureComponent{
         ];
     }
 
+    getPresentationModeSelectOptions(){
+        return [
+            {value: 'canvas', label: 'Canvas'},
+            {value: 'html', label: 'Html DOM table'}
+        ];
+    }
+
     render(){
         const {
             onResetButtonClick,
@@ -53,12 +60,17 @@ export class Settings extends React.PureComponent{
             onRuleSelectChange,
             onGenerateCellsButtonClick,
             onNextCycleButtonClick,
-            aliveCellProbability
+            onPresentationModeSelectChange
         } = this.props;
 
         return (
             <div className="settings">
                 <div className="button-container">
+                    <Select
+                        options={this.getPresentationModeSelectOptions()}
+                        onChange={onPresentationModeSelectChange}
+                        label="Select display mode:"
+                    />
                     <Select
                         options={this.getRuleSelectOptions()}
                         onChange={onRuleSelectChange}

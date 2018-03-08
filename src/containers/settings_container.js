@@ -12,7 +12,8 @@ import {
     nextCycle,
     changeAliveCellProbability,
     generateCellsRandomly,
-    changeRule
+    changeRule,
+    changePresentationMode
 } from '../actions/action_creators';
 import {Settings} from '../components/settings';
 
@@ -54,6 +55,9 @@ const mapDispatchToProps = dispatch => {
         },
         changeRule: newRule => {
             dispatch(changeRule(newRule));
+        },
+        changePresentationMode: () => {
+            dispatch(changePresentationMode());
         }
     };
 };
@@ -103,7 +107,6 @@ class SettingsContainer extends React.PureComponent{
     onGenerateCellsButtonClick(){
         const {
             aliveCellProbability,
-            resetBoard,
             generateRandomCells
         } = this.props;
 
@@ -116,6 +119,17 @@ class SettingsContainer extends React.PureComponent{
         } = this.props;
 
         nextCycle();
+    }
+    @autobind
+    onChangePresentationMode(){
+        const {
+            resetBoard,
+            changePresentationMode,
+            stopCycle
+        } = this.props;
+
+        resetBoard();
+        changePresentationMode();
     }
 
     render(){
@@ -140,6 +154,7 @@ class SettingsContainer extends React.PureComponent{
                     onGenerateCellsButtonClick={this.onGenerateCellsButtonClick}
                     onNextCycleButtonClick={this.onNextCycleButtonClick}
                     onRuleSelectChange={this.onRuleSelectChange}
+                    onPresentationModeSelectChange={this.onChangePresentationMode}
                 />
             </div>
         );

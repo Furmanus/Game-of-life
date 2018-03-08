@@ -8,7 +8,8 @@ import {
     STOP_CYCLE,
     CHANGE_ALIVE_CELL_PROBABILITY,
     GENERATE_CELLS_RANDOMLY,
-    CHANGE_RULE
+    CHANGE_RULE,
+    CHANGE_PRESENTATION_MODE
 } from '../constants/actions';
 
 export function changeCellState(x, y){
@@ -77,5 +78,10 @@ export function changeRule(rule){
     return {
         type: CHANGE_RULE,
         rule
+    };
+}
+export function changePresentationMode(){
+    return {
+        type: CHANGE_PRESENTATION_MODE
     };
 }

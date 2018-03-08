@@ -26,7 +26,6 @@ export class Cell extends React.PureComponent{
     }
 
     render(){
-        const {onClick} = this.props;
 
         return <td style={this.getCellStyles()} onClick={this.onCellClick}/>
     }

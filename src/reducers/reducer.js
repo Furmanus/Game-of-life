@@ -9,24 +9,29 @@ import {
     CLOSE_SETTINGS,
     RESET_BOARD,
     CHANGE_ALIVE_CELL_PROBABILITY,
-    GENERATE_CELLS_RANDOMLY, CHANGE_RULE
+    GENERATE_CELLS_RANDOMLY,
+    CHANGE_RULE,
+    CHANGE_PRESENTATION_MODE
 } from '../constants/actions';
 import {
     ALIVE,
     DEAD
 } from '../constants/cell_contants';
-import {calculateTableDimension} from '../utils/dom';
+import {
+    calculateTableDimension,
+    getAppContainerDimenstion
+} from '../utils/dom';
 
-const boardDimension = calculateTableDimension();
+let boardDimension;
 
 const initialState = {
-    cells: prepareInitialBoardState(),
+    cells: prepareInitialBoardState('canvas'),
     timerInterval: null,
     isMenuOpen: false,
     isGameTemporarilyPaused: false,
     aliveCellProbability: 10,
     rule: '23/3',
-    presentationMode: 'html'
+    presentationMode: 'canvas'
 };
 
 export default createReducer(initialState, {
@@ -47,7 +52,7 @@ export default createReducer(initialState, {
 
         return {
             ...state,
-            cells: changeCellsStateAfterCycle(state.cells, ruleArray)
+            cells: changeCellsStateAfterCycle(state.cells, ruleArray, state.presentationMode)
         };
     },
     [STOP_CYCLE]: state => {
@@ -94,6 +99,15 @@ export default createReducer(initialState, {
             ...state,
             rule: action.rule
         };
+    },
+    [CHANGE_PRESENTATION_MODE]: state => {
+        const presentationMode = state.presentationMode === 'canvas' ? 'html' : 'canvas';
+
+        return {
+            ...state,
+            presentationMode,
+            cells: prepareInitialBoardState(presentationMode)
+        };
     }
 });
 
@@ -119,10 +133,12 @@ function changeSingleCellState(cells, x, y){
     }
 }
 
-function changeCellsStateAfterCycle(cells, rule){
+function changeCellsStateAfterCycle(cells, rule, presentationMode){
     const cellsCopy = {};
     let examinedValue;
     let examinedNeighbours;
+
+    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension()
 
     for(let coords in cells){
         if(cells.hasOwnProperty(coords)){

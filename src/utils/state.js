@@ -1,8 +1,8 @@
 import {ALIVE, DEAD} from '../constants/cell_contants';
-import {calculateTableDimension} from './dom';
+import {calculateTableDimension, getAppContainerDimenstion} from './dom';
 
-export function prepareInitialBoardState(){
-    const tableDimensions = calculateTableDimension();
+export function prepareInitialBoardState(presentationMode){
+    const tableDimensions = presentationMode === 'canvas' ? getAppContainerDimenstion() :calculateTableDimension();
     const tableInitialState = {};
     const rows = tableDimensions.rows;
     const columns = tableDimensions.columns;
