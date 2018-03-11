@@ -25,7 +25,7 @@ import {
 let boardDimension;
 
 const initialState = {
-    cells: prepareInitialBoardState('canvas'),
+    aliveCells: [],
     timerInterval: null,
     isMenuOpen: false,
     isGameTemporarilyPaused: false,
@@ -38,7 +38,7 @@ export default createReducer(initialState, {
     [CHANGE_CELL_STATE]: (state, action) => {
         return {
             ...state,
-            cells: changeSingleCellState(state.cells, action.row, action.column)
+            aliveCells: changeSingleCellState(state.aliveCells, action.row, action.column)
         };
     },
     [START_CYCLE]: (state, action) => {
@@ -52,7 +52,7 @@ export default createReducer(initialState, {
 
         return {
             ...state,
-            cells: changeCellsStateAfterCycle(state.cells, ruleArray, state.presentationMode)
+            aliveCells: changeCellsStateAfterCycle(state.aliveCells, ruleArray, state.presentationMode)
         };
     },
     [STOP_CYCLE]: state => {
@@ -78,7 +78,7 @@ export default createReducer(initialState, {
     [RESET_BOARD]: state => {
         return {
             ...state,
-            cells: resetStateCells(state.cells),
+            aliveCells: [],
             isGameTemporarilyPaused: false
         };
     },
@@ -91,7 +91,7 @@ export default createReducer(initialState, {
     [GENERATE_CELLS_RANDOMLY]: (state, action) => {
         return {
             ...state,
-            cells: generateRandomCells(state.cells, action.probability)
+            aliveCells: generateRandomCells(action.probability, state.presentationMode)
         };
     },
     [CHANGE_RULE]: (state, action) => {
@@ -111,106 +111,124 @@ export default createReducer(initialState, {
     }
 });
 
-function resetStateCells(cells){
-    const cellsCopy = {};
+//------------HELPER FUNCTIONS-------------------
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = DEAD;
-        }
-    }
-
-    return cellsCopy;
-}
-
-function changeSingleCellState(cells, x, y){
+function changeSingleCellState(aliveCells, x, y){
     const cellCoordinates = `${x}x${y}`;
-    const newCellState = cells[cellCoordinates] === DEAD ? ALIVE : DEAD;
+    const aliveCellsCopy = [...aliveCells];
 
-    return {
-        ...cells,
-        [`${x}x${y}`]: newCellState
+    if(aliveCellsCopy.includes(cellCoordinates)){
+        aliveCellsCopy.splice(aliveCellsCopy.indexOf(cellCoordinates), 1);
+    }else{
+        aliveCellsCopy.push(cellCoordinates);
     }
+
+    return aliveCellsCopy;
 }
 
-function changeCellsStateAfterCycle(cells, rule, presentationMode){
-    const cellsCopy = {};
-    let examinedValue;
-    let examinedNeighbours;
+function changeCellsStateAfterCycle(aliveCells, rule, presentationMode){
+    const aliveCellsCopy = [];
+    const examinedAliveCells = {};
+    const examinedDeadCells = {};
+    let examinedCellNeighbourNumber;
+    let examinedCellNewState;
 
-    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension()
+    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension();
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = {
-                value: cells[coords],
-                neighbourNumber: getCellNeighbourNumber(coords, cells)
+    for(let cell of aliveCells){
+        calculateCellNeighbours(cell);
+    }
+
+    for(let cell in examinedAliveCells){
+        if(examinedAliveCells.hasOwnProperty(cell)) {
+            examinedCellNeighbourNumber = examinedAliveCells[cell];
+            examinedCellNewState = getNewCellState(ALIVE, examinedCellNeighbourNumber, rule);
+
+            if (examinedCellNewState === ALIVE) {
+                aliveCellsCopy.push(cell);
             }
         }
     }
 
-    for(let coords in cellsCopy){
-        if(cellsCopy.hasOwnProperty(coords)){
-            examinedValue = cellsCopy[coords].value;
-            examinedNeighbours = cellsCopy[coords].neighbourNumber;
+    for(let cell in examinedDeadCells){
+        if(examinedDeadCells.hasOwnProperty(cell)) {
+            examinedCellNeighbourNumber = examinedDeadCells[cell];
+            examinedCellNewState = getNewCellState(DEAD, examinedCellNeighbourNumber, rule);
 
-            cellsCopy[coords] = getNewCellState(examinedValue, examinedNeighbours, rule)
-        }
-    }
-
-    return cellsCopy;
-}
-
-function getCellNeighbourNumber(coordinates, cells){
-    const coordinatesArray = coordinates.split('x');
-    const x = parseInt(coordinatesArray[0], 10);
-    const y = parseInt(coordinatesArray[1], 10);
-    let aliveNeighbourCount = 0;
-    let examinedX;
-    let examinedY;
-
-    for(let i=-1; i<=1; i++){
-        for(let j=-1; j<=1; j++){
-
-            if(i !== 0 || j !== 0){
-
-                if(x + i < 0){
-                    examinedX = boardDimension.columns - 1;
-                }else if(x + i >= boardDimension.columns){
-                    examinedX = 0;
-                }else{
-                    examinedX = x + i;
-                }
-
-                if(y + j < 0){
-                    examinedY = boardDimension.rows - 1;
-                }else if(y + j >= boardDimension.rows){
-                    examinedY = 0;
-                }else{
-                    examinedY = y + j;
-                }
-
-                if(cells[`${examinedX}x${examinedY}`] === ALIVE){
-
-                    aliveNeighbourCount++;
-                }
+            if (examinedCellNewState === ALIVE) {
+                aliveCellsCopy.push(cell);
             }
         }
     }
 
-    return aliveNeighbourCount;
+    return aliveCellsCopy;
+
+    function calculateCellNeighbours(examinedCell){
+        const coordinatesArray = examinedCell.split('x');
+        const x = parseInt(coordinatesArray[0], 10);
+        const y = parseInt(coordinatesArray[1], 10);
+        let examinedNewX;
+        let examinedNewY;
+        let examinedNeighbourCell;
+
+        examinedAliveCells[examinedCell] = 0;
+
+        for(let i=-1; i<=1; i++){
+            for(let j=-1; j<=1; j++){
+
+                if(i !== 0 || j !== 0){
+
+                    if(x + i < 0){
+                        examinedNewX = boardDimension.columns - 1;
+                    }else if(x + i >= boardDimension.columns){
+                        examinedNewX = 0;
+                    }else{
+                        examinedNewX = x + i;
+                    }
+
+                    if(y + j < 0){
+                        examinedNewY = boardDimension.rows - 1;
+                    }else if(y + j >= boardDimension.rows){
+                        examinedNewY = 0;
+                    }else{
+                        examinedNewY = y + j;
+                    }
+
+                    examinedNeighbourCell = `${examinedNewX}x${examinedNewY}`;
+
+                    if(aliveCells.includes(examinedNeighbourCell)){
+                        examinedAliveCells[examinedCell]++;
+                    }else{
+                        if(examinedDeadCells[examinedNeighbourCell]){
+                            examinedDeadCells[examinedNeighbourCell]++;
+                        }else{
+                            examinedDeadCells[examinedNeighbourCell] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-function generateRandomCells(cells, probability){
-    const cellsCopy = {};
+function generateRandomCells(probability, presentationMode){
+    const aliveCells = [];
+    let boardWidth;
+    let boardHeight;
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = (Math.floor(Math.random() * 100) < probability) ? ALIVE : DEAD;
+    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension();
+    boardWidth = boardDimension.rows;
+    boardHeight = boardDimension.columns;
+
+    for(let i=0; i<boardWidth; i++){
+        for(let j=0; j<boardHeight; j++){
+            if(Math.floor(Math.random() * 100 < probability)){
+                aliveCells.push(`${i}x${j}`);
+            }
         }
     }
 
-    return cellsCopy;
+    return aliveCells;
 }
 
 function getNewCellState(previousCellState, neighbourNumber, rule){

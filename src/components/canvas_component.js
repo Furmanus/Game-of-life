@@ -13,7 +13,7 @@ import {
     ALIVE,
     DEAD
 } from '../constants/cell_contants';
-import {spaceKeyEventListener} from "../utils/events";
+import {spaceKeyEventListener} from '../utils/events';
 
 const canvasStyle = {
     border: '1px solid #062F4F',
@@ -22,7 +22,7 @@ const canvasStyle = {
 const mapStateToProps = state => {
     return {
         timerId: state.timerInterval,
-        cells: state.cells,
+        aliveCells: state.aliveCells,
     };
 };
 
@@ -60,29 +60,31 @@ class CanvasComponent extends React.Component{
 
     shouldComponentUpdate(nextProps){
         const {
-            cells
+            aliveCells
         } = this.props;
-        const nextCells = nextProps.cells;
+        const nextAliveCells = nextProps.aliveCells;
         let examinedCoord;
 
-        for(let coord in cells){
-            if(cells.hasOwnProperty(coord)){
-                if(cells[coord] !== nextCells[coord]){
-                    examinedCoord = coord.split('x');
+        for(let cell of aliveCells){
+            if(!nextAliveCells.includes(cell)){
+                examinedCoord = cell.split('x');
 
-                    if(nextCells[coord] === DEAD){
-                        this.clearRect(
-                            parseInt(examinedCoord[0], 10),
-                            parseInt(examinedCoord[1], 10)
-                        );
-                    }else if(nextCells[coord] === ALIVE){
-                        this.fillRect(
-                            parseInt(examinedCoord[0], 10),
-                            parseInt(examinedCoord[1], 10),
-                            '#1aff1a'
-                        );
-                    }
-                }
+                this.clearRect(
+                    parseInt(examinedCoord[0], 10),
+                    parseInt(examinedCoord[1], 10)
+                );
+            }
+        }
+
+        for(let cell of nextAliveCells){
+            if(!aliveCells.includes(cell)){
+                examinedCoord = cell.split('x');
+
+                this.fillRect(
+                    parseInt(examinedCoord[0], 10),
+                    parseInt(examinedCoord[1], 10),
+                    '#1aff1a'
+                );
             }
         }
 
@@ -129,5 +131,5 @@ class CanvasComponent extends React.Component{
 export default connect(mapStateToProps, mapDispatchToProps)(CanvasComponent);
 
 CanvasComponent.propTypes = {
-    cells: PropTypes.object.isRequired
+    aliveCells: PropTypes.array.isRequired
 };

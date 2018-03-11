@@ -26,7 +26,7 @@ export function startCycle(){
             dispatch({
                 type: NEXT_CYCLE
             });
-        });
+        }, 100);
 
         dispatch({
             type: START_CYCLE,
