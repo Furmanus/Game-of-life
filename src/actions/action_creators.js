@@ -9,7 +9,8 @@ import {
     CHANGE_ALIVE_CELL_PROBABILITY,
     GENERATE_CELLS_RANDOMLY,
     CHANGE_RULE,
-    CHANGE_PRESENTATION_MODE
+    CHANGE_PRESENTATION_MODE,
+    PREDEFINED_STRUCTURE_USE
 } from '../constants/actions';
 
 export function changeCellState(x, y){
@@ -83,5 +84,11 @@ export function changeRule(rule){
 export function changePresentationMode(){
     return {
         type: CHANGE_PRESENTATION_MODE
+    };
+}
+export function predefinedStructureUse(structure){
+    return {
+        type: PREDEFINED_STRUCTURE_USE,
+        structure
     };
 }

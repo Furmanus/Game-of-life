@@ -1,5 +1,5 @@
 import {createReducer} from 'redux-create-reducer';
-import {prepareInitialBoardState} from '../utils/state';
+import {getPreparedStructureBoard, prepareInitialBoardState} from '../utils/state';
 import {
     CHANGE_CELL_STATE,
     START_CYCLE,
@@ -11,7 +11,8 @@ import {
     CHANGE_ALIVE_CELL_PROBABILITY,
     GENERATE_CELLS_RANDOMLY,
     CHANGE_RULE,
-    CHANGE_PRESENTATION_MODE
+    CHANGE_PRESENTATION_MODE,
+    PREDEFINED_STRUCTURE_USE
 } from '../constants/actions';
 import {
     ALIVE,
@@ -107,6 +108,12 @@ export default createReducer(initialState, {
             ...state,
             presentationMode,
             cells: prepareInitialBoardState(presentationMode)
+        };
+    },
+    [PREDEFINED_STRUCTURE_USE]: (state, action) => {
+        return {
+            ...state,
+            aliveCells: getPreparedStructureBoard(action.structure, state.presentationMode)
         };
     }
 });

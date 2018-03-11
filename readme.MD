@@ -2,5 +2,4 @@ Game of life implementation written in React based on HTML elements (I used HTML
 
 To do:
 
-- Canvas based implementation
-- Predefined structures
+- Option to disable wrapping map

@@ -3,6 +3,11 @@ import './styles/settings.css';
 import {findDOMNode} from "react-dom";
 import {Button} from './button';
 import {Select} from './select';
+import {
+    GLIDER,
+    GOSPER_GLIDER_GUN,
+    LIGHTWEIGHT_SPACESHIP
+} from '../constants/predefined_structures';
 
 export class Settings extends React.PureComponent{
 
@@ -53,6 +58,14 @@ export class Settings extends React.PureComponent{
         ];
     }
 
+    getPredefinedStructuresSelectOptions(){
+        return [
+            {value: LIGHTWEIGHT_SPACESHIP, label: LIGHTWEIGHT_SPACESHIP},
+            {value: GLIDER, label: GLIDER},
+            {value: GOSPER_GLIDER_GUN, label: GOSPER_GLIDER_GUN}
+        ];
+    }
+
     render(){
         const {
             onResetButtonClick,
@@ -60,12 +73,18 @@ export class Settings extends React.PureComponent{
             onRuleSelectChange,
             onGenerateCellsButtonClick,
             onNextCycleButtonClick,
-            onPresentationModeSelectChange
+            onPresentationModeSelectChange,
+            onPredefinedStructureSelectChange
         } = this.props;
 
         return (
             <div className="settings">
                 <div className="button-container">
+                    <Select
+                        options={this.getPredefinedStructuresSelectOptions()}
+                        onChange={onPredefinedStructureSelectChange}
+                        label="Use predefined structure:"
+                    />
                     <Select
                         options={this.getPresentationModeSelectOptions()}
                         onChange={onPresentationModeSelectChange}

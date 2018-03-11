@@ -13,7 +13,8 @@ import {
     changeAliveCellProbability,
     generateCellsRandomly,
     changeRule,
-    changePresentationMode
+    changePresentationMode,
+    predefinedStructureUse
 } from '../actions/action_creators';
 import {Settings} from '../components/settings';
 
@@ -58,6 +59,9 @@ const mapDispatchToProps = dispatch => {
         },
         changePresentationMode: () => {
             dispatch(changePresentationMode());
+        },
+        predefinedStructureUse: structure => {
+            dispatch(predefinedStructureUse(structure));
         }
     };
 };
@@ -124,12 +128,21 @@ class SettingsContainer extends React.PureComponent{
     onChangePresentationMode(){
         const {
             resetBoard,
-            changePresentationMode,
-            stopCycle
+            changePresentationMode
         } = this.props;
 
         resetBoard();
         changePresentationMode();
+    }
+    @autobind
+    onChangePredefinedStructure(selectedStructure){
+        const {
+            predefinedStructureUse,
+            resetBoard
+        } = this.props;
+
+        resetBoard();
+        predefinedStructureUse(selectedStructure);
     }
 
     render(){
@@ -155,6 +168,7 @@ class SettingsContainer extends React.PureComponent{
                     onNextCycleButtonClick={this.onNextCycleButtonClick}
                     onRuleSelectChange={this.onRuleSelectChange}
                     onPresentationModeSelectChange={this.onChangePresentationMode}
+                    onPredefinedStructureSelectChange={this.onChangePredefinedStructure}
                 />
             </div>
         );
