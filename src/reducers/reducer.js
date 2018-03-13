@@ -12,7 +12,8 @@ import {
     GENERATE_CELLS_RANDOMLY,
     CHANGE_RULE,
     CHANGE_PRESENTATION_MODE,
-    PREDEFINED_STRUCTURE_USE
+    PREDEFINED_STRUCTURE_USE,
+    CHANGE_MAP_WRAP_OPTION
 } from '../constants/actions';
 import {
     ALIVE,
@@ -32,7 +33,8 @@ const initialState = {
     isGameTemporarilyPaused: false,
     aliveCellProbability: 10,
     rule: '23/3',
-    presentationMode: 'canvas'
+    presentationMode: 'canvas',
+    canWrapMap: false
 };
 
 export default createReducer(initialState, {
@@ -53,7 +55,7 @@ export default createReducer(initialState, {
 
         return {
             ...state,
-            aliveCells: changeCellsStateAfterCycle(state.aliveCells, ruleArray, state.presentationMode)
+            aliveCells: changeCellsStateAfterCycle(state.aliveCells, ruleArray, state.presentationMode, state.canWrapMap)
         };
     },
     [STOP_CYCLE]: state => {
@@ -115,6 +117,12 @@ export default createReducer(initialState, {
             ...state,
             aliveCells: getPreparedStructureBoard(action.structure, state.presentationMode)
         };
+    },
+    [CHANGE_MAP_WRAP_OPTION]: state => {
+        return {
+            ...state,
+            canWrapMap: !state.canWrapMap
+        };
     }
 });
 
@@ -133,7 +141,7 @@ function changeSingleCellState(aliveCells, x, y){
     return aliveCellsCopy;
 }
 
-function changeCellsStateAfterCycle(aliveCells, rule, presentationMode){
+function changeCellsStateAfterCycle(aliveCells, rule, presentationMode, canWrapMap){
     const aliveCellsCopy = [];
     const examinedAliveCells = {};
     const examinedDeadCells = {};
@@ -184,6 +192,10 @@ function changeCellsStateAfterCycle(aliveCells, rule, presentationMode){
             for(let j=-1; j<=1; j++){
 
                 if(i !== 0 || j !== 0){
+
+                    if(x + i < 0 || x + i >= boardDimension.columns || y + j < 0 || y + j >= boardDimension.rows){
+                        continue;
+                    }
 
                     if(x + i < 0){
                         examinedNewX = boardDimension.columns - 1;

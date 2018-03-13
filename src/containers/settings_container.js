@@ -14,7 +14,8 @@ import {
     generateCellsRandomly,
     changeRule,
     changePresentationMode,
-    predefinedStructureUse
+    predefinedStructureUse,
+    changeMapWrap
 } from '../actions/action_creators';
 import {Settings} from '../components/settings';
 
@@ -62,6 +63,9 @@ const mapDispatchToProps = dispatch => {
         },
         predefinedStructureUse: structure => {
             dispatch(predefinedStructureUse(structure));
+        },
+        changeMapWrap: () => {
+            dispatch(changeMapWrap());
         }
     };
 };
@@ -148,7 +152,8 @@ class SettingsContainer extends React.PureComponent{
     render(){
         const {
             isMenuOpen,
-            aliveCellProbability
+            aliveCellProbability,
+            changeMapWrap
         } = this.props;
 
         return (
@@ -169,6 +174,7 @@ class SettingsContainer extends React.PureComponent{
                     onRuleSelectChange={this.onRuleSelectChange}
                     onPresentationModeSelectChange={this.onChangePresentationMode}
                     onPredefinedStructureSelectChange={this.onChangePredefinedStructure}
+                    onMapWrapSwitchChange={changeMapWrap}
                 />
             </div>
         );
