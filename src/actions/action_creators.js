@@ -10,7 +10,8 @@ import {
     GENERATE_CELLS_RANDOMLY,
     CHANGE_RULE,
     CHANGE_PRESENTATION_MODE,
-    PREDEFINED_STRUCTURE_USE
+    PREDEFINED_STRUCTURE_USE,
+    CHANGE_MAP_WRAP_OPTION
 } from '../constants/actions';
 
 export function changeCellState(x, y){
@@ -90,5 +91,10 @@ export function predefinedStructureUse(structure){
     return {
         type: PREDEFINED_STRUCTURE_USE,
         structure
+    };
+}
+export function changeMapWrap(){
+    return {
+        type: CHANGE_MAP_WRAP_OPTION
     };
 }

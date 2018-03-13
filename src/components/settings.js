@@ -3,6 +3,7 @@ import './styles/settings.css';
 import {findDOMNode} from "react-dom";
 import {Button} from './button';
 import {Select} from './select';
+import ToggleSwitch from './toggle_switch';
 import {
     GLIDER,
     GOSPER_GLIDER_GUN,
@@ -74,7 +75,8 @@ export class Settings extends React.PureComponent{
             onGenerateCellsButtonClick,
             onNextCycleButtonClick,
             onPresentationModeSelectChange,
-            onPredefinedStructureSelectChange
+            onPredefinedStructureSelectChange,
+            onMapWrapSwitchChange
         } = this.props;
 
         return (
@@ -111,6 +113,10 @@ export class Settings extends React.PureComponent{
                     <Button
                         onClick={onNextCycleButtonClick}
                         value='Next cycle'
+                    />
+                    <ToggleSwitch
+                        label="Enable map wrap:"
+                        onChange={onMapWrapSwitchChange}
                     />
                 </div>
                 <h3>Press space to start or stop generator</h3>
