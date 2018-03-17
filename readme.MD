@@ -1,5 +1,6 @@
-Game of life implementation written in React based on HTML elements (I used HTML elements just to test performance).
+Game of life implementation written in React + Redux.
 
 To do:
 
-- Option to disable wrapping map
+- Show currently selected cell on canvas
+- Turn counter
