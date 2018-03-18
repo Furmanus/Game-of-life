@@ -3,6 +3,12 @@ import './styles/settings.css';
 import {findDOMNode} from "react-dom";
 import {Button} from './button';
 import {Select} from './select';
+import ToggleSwitch from './toggle_switch';
+import {
+    GLIDER,
+    GOSPER_GLIDER_GUN,
+    LIGHTWEIGHT_SPACESHIP
+} from '../constants/predefined_structures';
 
 export class Settings extends React.PureComponent{
 
@@ -46,6 +52,21 @@ export class Settings extends React.PureComponent{
         ];
     }
 
+    getPresentationModeSelectOptions(){
+        return [
+            {value: 'canvas', label: 'Canvas'},
+            {value: 'html', label: 'Html DOM table'}
+        ];
+    }
+
+    getPredefinedStructuresSelectOptions(){
+        return [
+            {value: LIGHTWEIGHT_SPACESHIP, label: LIGHTWEIGHT_SPACESHIP},
+            {value: GLIDER, label: GLIDER},
+            {value: GOSPER_GLIDER_GUN, label: GOSPER_GLIDER_GUN}
+        ];
+    }
+
     render(){
         const {
             onResetButtonClick,
@@ -53,12 +74,24 @@ export class Settings extends React.PureComponent{
             onRuleSelectChange,
             onGenerateCellsButtonClick,
             onNextCycleButtonClick,
-            aliveCellProbability
+            onPresentationModeSelectChange,
+            onPredefinedStructureSelectChange,
+            onMapWrapSwitchChange
         } = this.props;
 
         return (
             <div className="settings">
                 <div className="button-container">
+                    <Select
+                        options={this.getPredefinedStructuresSelectOptions()}
+                        onChange={onPredefinedStructureSelectChange}
+                        label="Use predefined structure:"
+                    />
+                    <Select
+                        options={this.getPresentationModeSelectOptions()}
+                        onChange={onPresentationModeSelectChange}
+                        label="Select display mode:"
+                    />
                     <Select
                         options={this.getRuleSelectOptions()}
                         onChange={onRuleSelectChange}
@@ -80,6 +113,10 @@ export class Settings extends React.PureComponent{
                     <Button
                         onClick={onNextCycleButtonClick}
                         value='Next cycle'
+                    />
+                    <ToggleSwitch
+                        label="Enable map wrap:"
+                        onChange={onMapWrapSwitchChange}
                     />
                 </div>
                 <h3>Press space to start or stop generator</h3>

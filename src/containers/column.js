@@ -4,14 +4,13 @@ import {Cell} from '../components/cell';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-    ALIVE,
     GREEN,
     TRANSPARENT
-} from "../constants/cell_contants";
+} from '../constants/cell_contants';
 
 const mapStateToProps = state => {
     return {
-        cells: state.cells
+        aliveCells: state.aliveCells
     }
 };
 
@@ -23,13 +22,13 @@ class Column extends React.PureComponent{
             totalColumnsNumber,
             rowNumber,
             onClick,
-            cells
+            aliveCells
         } = this.props;
         const columns = [];
         let examinedCellColour;
 
         for(let i=0; i<totalColumnsNumber; i++){
-            examinedCellColour = cells[`${rowNumber}x${i}`] === ALIVE ? GREEN : TRANSPARENT;
+            examinedCellColour = aliveCells.includes(`${rowNumber}x${i}`) ? GREEN : TRANSPARENT;
 
             columns[i] = (
                 <Cell
@@ -55,7 +54,7 @@ class Column extends React.PureComponent{
 }
 
 Column.propTypes = {
-    cells: PropTypes.object.isRequired,
+    aliveCells: PropTypes.array.isRequired,
     totalColumnsNumber: PropTypes.number.isRequired,
     rowNumber: PropTypes.number.isRequired,
     onClick: PropTypes.func

@@ -8,7 +8,10 @@ import {
     STOP_CYCLE,
     CHANGE_ALIVE_CELL_PROBABILITY,
     GENERATE_CELLS_RANDOMLY,
-    CHANGE_RULE
+    CHANGE_RULE,
+    CHANGE_PRESENTATION_MODE,
+    PREDEFINED_STRUCTURE_USE,
+    CHANGE_MAP_WRAP_OPTION
 } from '../constants/actions';
 
 export function changeCellState(x, y){
@@ -25,7 +28,7 @@ export function startCycle(){
             dispatch({
                 type: NEXT_CYCLE
             });
-        });
+        }, 100);
 
         dispatch({
             type: START_CYCLE,
@@ -77,5 +80,21 @@ export function changeRule(rule){
     return {
         type: CHANGE_RULE,
         rule
+    };
+}
+export function changePresentationMode(){
+    return {
+        type: CHANGE_PRESENTATION_MODE
+    };
+}
+export function predefinedStructureUse(structure){
+    return {
+        type: PREDEFINED_STRUCTURE_USE,
+        structure
+    };
+}
+export function changeMapWrap(){
+    return {
+        type: CHANGE_MAP_WRAP_OPTION
     };
 }

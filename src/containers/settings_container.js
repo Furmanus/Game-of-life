@@ -12,7 +12,10 @@ import {
     nextCycle,
     changeAliveCellProbability,
     generateCellsRandomly,
-    changeRule
+    changeRule,
+    changePresentationMode,
+    predefinedStructureUse,
+    changeMapWrap
 } from '../actions/action_creators';
 import {Settings} from '../components/settings';
 
@@ -54,6 +57,15 @@ const mapDispatchToProps = dispatch => {
         },
         changeRule: newRule => {
             dispatch(changeRule(newRule));
+        },
+        changePresentationMode: () => {
+            dispatch(changePresentationMode());
+        },
+        predefinedStructureUse: structure => {
+            dispatch(predefinedStructureUse(structure));
+        },
+        changeMapWrap: () => {
+            dispatch(changeMapWrap());
         }
     };
 };
@@ -103,7 +115,6 @@ class SettingsContainer extends React.PureComponent{
     onGenerateCellsButtonClick(){
         const {
             aliveCellProbability,
-            resetBoard,
             generateRandomCells
         } = this.props;
 
@@ -117,11 +128,32 @@ class SettingsContainer extends React.PureComponent{
 
         nextCycle();
     }
+    @autobind
+    onChangePresentationMode(){
+        const {
+            resetBoard,
+            changePresentationMode
+        } = this.props;
+
+        resetBoard();
+        changePresentationMode();
+    }
+    @autobind
+    onChangePredefinedStructure(selectedStructure){
+        const {
+            predefinedStructureUse,
+            resetBoard
+        } = this.props;
+
+        resetBoard();
+        predefinedStructureUse(selectedStructure);
+    }
 
     render(){
         const {
             isMenuOpen,
-            aliveCellProbability
+            aliveCellProbability,
+            changeMapWrap
         } = this.props;
 
         return (
@@ -140,6 +172,9 @@ class SettingsContainer extends React.PureComponent{
                     onGenerateCellsButtonClick={this.onGenerateCellsButtonClick}
                     onNextCycleButtonClick={this.onNextCycleButtonClick}
                     onRuleSelectChange={this.onRuleSelectChange}
+                    onPresentationModeSelectChange={this.onChangePresentationMode}
+                    onPredefinedStructureSelectChange={this.onChangePredefinedStructure}
+                    onMapWrapSwitchChange={changeMapWrap}
                 />
             </div>
         );

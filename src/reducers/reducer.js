@@ -1,5 +1,8 @@
 import {createReducer} from 'redux-create-reducer';
-import {prepareInitialBoardState} from '../utils/state';
+import {
+    getPreparedStructureBoard,
+    prepareInitialBoardState
+} from '../utils/state';
 import {
     CHANGE_CELL_STATE,
     START_CYCLE,
@@ -9,31 +12,40 @@ import {
     CLOSE_SETTINGS,
     RESET_BOARD,
     CHANGE_ALIVE_CELL_PROBABILITY,
-    GENERATE_CELLS_RANDOMLY, CHANGE_RULE
+    GENERATE_CELLS_RANDOMLY,
+    CHANGE_RULE,
+    CHANGE_PRESENTATION_MODE,
+    PREDEFINED_STRUCTURE_USE,
+    CHANGE_MAP_WRAP_OPTION
 } from '../constants/actions';
 import {
     ALIVE,
     DEAD
 } from '../constants/cell_contants';
-import {calculateTableDimension} from '../utils/dom';
+import {
+    calculateTableDimension,
+    getAppContainerDimenstion
+} from '../utils/dom';
 
-const boardDimension = calculateTableDimension();
+let boardDimension;
 
 const initialState = {
-    cells: prepareInitialBoardState(),
+    turn: 0,
+    aliveCells: [],
     timerInterval: null,
     isMenuOpen: false,
     isGameTemporarilyPaused: false,
     aliveCellProbability: 10,
     rule: '23/3',
-    presentationMode: 'html'
+    presentationMode: 'canvas',
+    canWrapMap: false
 };
 
 export default createReducer(initialState, {
     [CHANGE_CELL_STATE]: (state, action) => {
         return {
             ...state,
-            cells: changeSingleCellState(state.cells, action.row, action.column)
+            aliveCells: changeSingleCellState(state.aliveCells, action.row, action.column)
         };
     },
     [START_CYCLE]: (state, action) => {
@@ -47,7 +59,8 @@ export default createReducer(initialState, {
 
         return {
             ...state,
-            cells: changeCellsStateAfterCycle(state.cells, ruleArray)
+            turn: state.turn + 1,
+            aliveCells: changeCellsStateAfterCycle(state.aliveCells, ruleArray, state.presentationMode, state.canWrapMap)
         };
     },
     [STOP_CYCLE]: state => {
@@ -73,7 +86,8 @@ export default createReducer(initialState, {
     [RESET_BOARD]: state => {
         return {
             ...state,
-            cells: resetStateCells(state.cells),
+            aliveCells: [],
+            turn: 0,
             isGameTemporarilyPaused: false
         };
     },
@@ -86,7 +100,7 @@ export default createReducer(initialState, {
     [GENERATE_CELLS_RANDOMLY]: (state, action) => {
         return {
             ...state,
-            cells: generateRandomCells(state.cells, action.probability)
+            aliveCells: generateRandomCells(action.probability, state.presentationMode)
         };
     },
     [CHANGE_RULE]: (state, action) => {
@@ -94,107 +108,152 @@ export default createReducer(initialState, {
             ...state,
             rule: action.rule
         };
+    },
+    [CHANGE_PRESENTATION_MODE]: state => {
+        const presentationMode = state.presentationMode === 'canvas' ? 'html' : 'canvas';
+
+        return {
+            ...state,
+            presentationMode,
+            cells: prepareInitialBoardState(presentationMode)
+        };
+    },
+    [PREDEFINED_STRUCTURE_USE]: (state, action) => {
+        return {
+            ...state,
+            aliveCells: getPreparedStructureBoard(action.structure, state.presentationMode)
+        };
+    },
+    [CHANGE_MAP_WRAP_OPTION]: state => {
+        return {
+            ...state,
+            canWrapMap: !state.canWrapMap
+        };
     }
 });
 
-function resetStateCells(cells){
-    const cellsCopy = {};
+//------------HELPER FUNCTIONS-------------------
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = DEAD;
-        }
-    }
-
-    return cellsCopy;
-}
-
-function changeSingleCellState(cells, x, y){
+function changeSingleCellState(aliveCells, x, y){
     const cellCoordinates = `${x}x${y}`;
-    const newCellState = cells[cellCoordinates] === DEAD ? ALIVE : DEAD;
+    const aliveCellsCopy = [...aliveCells];
 
-    return {
-        ...cells,
-        [`${x}x${y}`]: newCellState
+    if(aliveCellsCopy.includes(cellCoordinates)){
+        aliveCellsCopy.splice(aliveCellsCopy.indexOf(cellCoordinates), 1);
+    }else{
+        aliveCellsCopy.push(cellCoordinates);
     }
+
+    return aliveCellsCopy;
 }
 
-function changeCellsStateAfterCycle(cells, rule){
-    const cellsCopy = {};
-    let examinedValue;
-    let examinedNeighbours;
+function changeCellsStateAfterCycle(aliveCells, rule, presentationMode, canWrapMap){
+    const aliveCellsCopy = [];
+    const examinedAliveCells = {};
+    const examinedDeadCells = {};
+    let examinedCellNeighbourNumber;
+    let examinedCellNewState;
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = {
-                value: cells[coords],
-                neighbourNumber: getCellNeighbourNumber(coords, cells)
+    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension();
+
+    for(let cell of aliveCells){
+        calculateCellNeighbours(cell);
+    }
+
+    for(let cell in examinedAliveCells){
+        if(examinedAliveCells.hasOwnProperty(cell)) {
+            examinedCellNeighbourNumber = examinedAliveCells[cell];
+            examinedCellNewState = getNewCellState(ALIVE, examinedCellNeighbourNumber, rule);
+
+            if (examinedCellNewState === ALIVE) {
+                aliveCellsCopy.push(cell);
             }
         }
     }
 
-    for(let coords in cellsCopy){
-        if(cellsCopy.hasOwnProperty(coords)){
-            examinedValue = cellsCopy[coords].value;
-            examinedNeighbours = cellsCopy[coords].neighbourNumber;
+    for(let cell in examinedDeadCells){
+        if(examinedDeadCells.hasOwnProperty(cell)) {
+            examinedCellNeighbourNumber = examinedDeadCells[cell];
+            examinedCellNewState = getNewCellState(DEAD, examinedCellNeighbourNumber, rule);
 
-            cellsCopy[coords] = getNewCellState(examinedValue, examinedNeighbours, rule)
-        }
-    }
-
-    return cellsCopy;
-}
-
-function getCellNeighbourNumber(coordinates, cells){
-    const coordinatesArray = coordinates.split('x');
-    const x = parseInt(coordinatesArray[0], 10);
-    const y = parseInt(coordinatesArray[1], 10);
-    let aliveNeighbourCount = 0;
-    let examinedX;
-    let examinedY;
-
-    for(let i=-1; i<=1; i++){
-        for(let j=-1; j<=1; j++){
-
-            if(i !== 0 || j !== 0){
-
-                if(x + i < 0){
-                    examinedX = boardDimension.columns - 1;
-                }else if(x + i >= boardDimension.columns){
-                    examinedX = 0;
-                }else{
-                    examinedX = x + i;
-                }
-
-                if(y + j < 0){
-                    examinedY = boardDimension.rows - 1;
-                }else if(y + j >= boardDimension.rows){
-                    examinedY = 0;
-                }else{
-                    examinedY = y + j;
-                }
-
-                if(cells[`${examinedX}x${examinedY}`] === ALIVE){
-
-                    aliveNeighbourCount++;
-                }
+            if (examinedCellNewState === ALIVE) {
+                aliveCellsCopy.push(cell);
             }
         }
     }
 
-    return aliveNeighbourCount;
+    return aliveCellsCopy;
+
+    function calculateCellNeighbours(examinedCell){
+        const coordinatesArray = examinedCell.split('x');
+        const x = parseInt(coordinatesArray[0], 10);
+        const y = parseInt(coordinatesArray[1], 10);
+        let examinedNewX;
+        let examinedNewY;
+        let examinedNeighbourCell;
+
+        examinedAliveCells[examinedCell] = 0;
+
+        for(let i=-1; i<=1; i++){
+            for(let j=-1; j<=1; j++){
+
+                if(i !== 0 || j !== 0){
+
+                    if(x + i < 0 || x + i >= boardDimension.columns || y + j < 0 || y + j >= boardDimension.rows){
+                        continue;
+                    }
+
+                    if(x + i < 0){
+                        examinedNewX = boardDimension.columns - 1;
+                    }else if(x + i >= boardDimension.columns){
+                        examinedNewX = 0;
+                    }else{
+                        examinedNewX = x + i;
+                    }
+
+                    if(y + j < 0){
+                        examinedNewY = boardDimension.rows - 1;
+                    }else if(y + j >= boardDimension.rows){
+                        examinedNewY = 0;
+                    }else{
+                        examinedNewY = y + j;
+                    }
+
+                    examinedNeighbourCell = `${examinedNewX}x${examinedNewY}`;
+
+                    if(aliveCells.includes(examinedNeighbourCell)){
+                        examinedAliveCells[examinedCell]++;
+                    }else{
+                        if(examinedDeadCells[examinedNeighbourCell]){
+                            examinedDeadCells[examinedNeighbourCell]++;
+                        }else{
+                            examinedDeadCells[examinedNeighbourCell] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-function generateRandomCells(cells, probability){
-    const cellsCopy = {};
+function generateRandomCells(probability, presentationMode){
+    const aliveCells = [];
+    let boardWidth;
+    let boardHeight;
 
-    for(let coords in cells){
-        if(cells.hasOwnProperty(coords)){
-            cellsCopy[coords] = (Math.floor(Math.random() * 100) < probability) ? ALIVE : DEAD;
+    boardDimension = (presentationMode === 'canvas') ? getAppContainerDimenstion() : calculateTableDimension();
+    boardWidth = boardDimension.rows;
+    boardHeight = boardDimension.columns;
+
+    for(let i=0; i<boardWidth; i++){
+        for(let j=0; j<boardHeight; j++){
+            if(Math.floor(Math.random() * 100 < probability)){
+                aliveCells.push(`${i}x${j}`);
+            }
         }
     }
 
-    return cellsCopy;
+    return aliveCells;
 }
 
 function getNewCellState(previousCellState, neighbourNumber, rule){
