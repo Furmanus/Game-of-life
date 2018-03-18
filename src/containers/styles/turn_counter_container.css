@@ -1,0 +1,7 @@
+.turn-counter-container {
+    width: auto;
+    height: 300px;
+    position: absolute;
+    left: 30px;
+    top: calc(50% - 150px);
+}

@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 import CanvasComponent from './../components/canvas_component';
 import SettingsContainer from './settings_container';
 import GameContainer from './game_container';
+import TurnCounterContainer from './turn_counter_container';
 
 const mapStateToProps = state => {
     return {
@@ -19,6 +20,7 @@ class Page extends React.PureComponent{
 
         return (
             <div>
+                <TurnCounterContainer/>
                 {presentationMode === 'canvas' ? <CanvasComponent/> : <GameContainer/>}
                 <SettingsContainer/>
             </div>
