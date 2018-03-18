@@ -1,5 +1,8 @@
 import {createReducer} from 'redux-create-reducer';
-import {getPreparedStructureBoard, prepareInitialBoardState} from '../utils/state';
+import {
+    getPreparedStructureBoard,
+    prepareInitialBoardState
+} from '../utils/state';
 import {
     CHANGE_CELL_STATE,
     START_CYCLE,
@@ -27,6 +30,7 @@ import {
 let boardDimension;
 
 const initialState = {
+    turn: 0,
     aliveCells: [],
     timerInterval: null,
     isMenuOpen: false,
@@ -55,6 +59,7 @@ export default createReducer(initialState, {
 
         return {
             ...state,
+            turn: state.turn + 1,
             aliveCells: changeCellsStateAfterCycle(state.aliveCells, ruleArray, state.presentationMode, state.canWrapMap)
         };
     },
@@ -82,6 +87,7 @@ export default createReducer(initialState, {
         return {
             ...state,
             aliveCells: [],
+            turn: 0,
             isGameTemporarilyPaused: false
         };
     },
